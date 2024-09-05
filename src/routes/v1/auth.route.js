@@ -3,6 +3,8 @@ const validate = require('../../middlewares/validate');
 const authValidation = require('../../validations/auth.validation');
 const authController = require('../../controllers/auth.controller');
 const auth = require('../../middlewares/auth');
+const passport = require('passport');
+const config = require('../../config/config');
 
 const router = express.Router();
 
@@ -15,6 +17,11 @@ router.post('/reset-password', validate(authValidation.resetPassword), authContr
 router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
 router.post('/verify-email', validate(authValidation.verifyEmail), authController.verifyEmail);
 
+// Google Auth route
+router.post('/google', validate(authValidation.register), authController.googleAuth);
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google/callback', passport.authenticate('google', { session: false }), authController.googleSignIn);
+
 module.exports = router;
 
 /**
@@ -23,6 +30,64 @@ module.exports = router;
  *   name: Auth
  *   description: Authentication
  */
+/**
+ * @swagger
+ * /auth/google:
+ *   get:
+ *     summary: Google Authentication
+ *     tags: [Auth]
+ *     description: |
+ *       Initiates the Google authentication process. 
+ *       Visit: [http://localhost:3000/v1/auth/google/](http://localhost:3000/v1/auth/google/)
+ *       Note: If you are using port other than 3000, replace it with your port number.
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "5ebac534954b54139806c112"
+ *                     email:
+ *                       type: string
+ *                       example: "fake@example.com"
+ *                     name:
+ *                       type: string
+ *                       example: "fake name"
+ *                     role:
+ *                       type: string
+ *                       example: "user"
+ *                 tokens:
+ *                   type: object
+ *                   properties:
+ *                     access:
+ *                       type: object
+ *                       properties:
+ *                         token:
+ *                           type: string
+ *                           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJhYzUzNDk1NGI1NDEzOTgwNmMxMTIiLCJpYXQiOjE1ODkyOTg0ODQsImV4cCI6MTU4OTMwMDI4NH0.m1U63blB0MLej_WfB7yC2FTMnCziif9X8yzwDEfJXAg"
+ *                         expires:
+ *                           type: string
+ *                           format: date-time
+ *                           example: "2020-05-12T16:18:04.793Z"
+ *                     refresh:
+ *                       type: object
+ *                       properties:
+ *                         token:
+ *                           type: string
+ *                           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJhYzUzNDk1NGI1NDEzOTgwNmMxMTIiLCJpYXQiOjE1ODkyOTg0ODQsImV4cCI6MTU4OTMwMDI4NH0.m1U63blB0MLej_WfB7yC2FTMnCziif9X8yzwDEfJXAg"
+ *                         expires:
+ *                           type: string
+ *                           format: date-time
+ *                           example: "2020-05-12T16:18:04.793Z"
+ */
+
 
 /**
  * @swagger
