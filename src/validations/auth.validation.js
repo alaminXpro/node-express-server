@@ -16,16 +16,33 @@ const login = {
   }),
 };
 
+const customValidation = (value, helpers) => {
+  if (!value.body.refreshToken && !value.cookies.refreshToken) {
+    return helpers.response({ statusCode: 400, message: 'Custom error message' });
+  }
+  return value;
+};
+
 const logout = {
   body: Joi.object().keys({
-    refreshToken: Joi.string().required(),
+    refreshToken: Joi.string().optional(),
   }),
+  cookies: Joi.object().keys({
+    refreshToken: Joi.string().optional(),
+
+  }),
+  custom: Joi.object().custom(customValidation, 'Custom validation').required(),
 };
 
 const refreshTokens = {
   body: Joi.object().keys({
-    refreshToken: Joi.string().required(),
+    refreshToken: Joi.string().optional(),
   }),
+  cookies: Joi.object().keys({
+    refreshToken: Joi.string().optional(),
+
+  }),
+  custom: Joi.object().custom(customValidation, 'Custom validation').required(),
 };
 
 const forgotPassword = {
